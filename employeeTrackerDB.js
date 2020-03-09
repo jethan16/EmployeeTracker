@@ -33,7 +33,7 @@ connection.connect(function (err) {
 
 function init() {
 
-    
+
     inquirer.prompt({
         name: 'initChoice',
         type: 'list',
@@ -66,6 +66,7 @@ const manageEmployees = () => {
             'Add a new employee.',
             'Remove an existing employee.',
             'Update an employee.',
+            'Remove all employees.',
             '<--- back'
         ]
     }).then(results => {
@@ -77,12 +78,30 @@ const manageEmployees = () => {
             removeEmployee()
         } else if (results.employeeChoice === 'Update an employee.') {
             updateEmployee()
+        } else if (results.employeeChoice === 'Remove all employees.') {
+            inquirer.prompt({
+                name: 'confirmation',
+                type: 'list',
+                message: 'Are you sure?',
+                choices: ['yes', 'no']
+            }).then(results => {
+                if (results.confirmation === 'yes') {
+                    connection.query(
+                        "DELETE FROM employees",
+                        function () {
+                            console.log(`\n All employees have been removed from database. \n`),
+                                init()
+                        }
+                    )
+                } else {
+                    init()
+                }
+            })
         } else {
             init()
         }
     })
 }
-
 const manageDepartments = () => {
     inquirer.prompt({
         name: 'deptChoice',
@@ -90,6 +109,7 @@ const manageDepartments = () => {
         message: 'What would you like to do?',
         choices: [
             'View all departments.',
+            'View employees by department.',
             'Add a new department.',
             'Remove an existing department.',
             '<-- Back.'
@@ -99,6 +119,8 @@ const manageDepartments = () => {
             viewDepartment()
         } else if (results.deptChoice === 'Add a new department.') {
             addDepartment()
+        } else if (results.deptChoice === 'View employees by department.') {
+            viewByDept()
         } else if (results.deptChoice === 'Remove an existing department.') {
             removeDepartment()
         } else {
@@ -135,7 +157,9 @@ const manageRoles = () => {
 
 const viewEmployees = () => {
     connection.query(
-        "SELECT * FROM employees",
+        `SELECT id, full_name, roles, salary, manager FROM
+       employees LEFT JOIN roles 
+       ON employees.roles = roles.title;`,
         function (err, res) {
             if (err) {
                 throw err;
@@ -236,7 +260,7 @@ function addEmployee() {
                     manangerUpdate(results)
                 } else {
                     connection.query(
-                        "SELECT full_name FROM employees WHERE is_manager = true", function (err, res) {
+                        "SELECT * FROM employees WHERE is_manager = true", function (err, res) {
                             if (res.length === 0) {
                                 console.log(`\n 'There are no existing manager's. \n`);
                                 init()
@@ -252,7 +276,24 @@ function addEmployee() {
                                         return managerArr
                                     },
                                     message: 'Who is their manager?',
-                                }).then(results => {
+                                }).then(results2 => {
+                                    // console.log('1',results2.managerOption);
+                                    // console.log('2', res);
+                                    var managerPos;
+                                    for (var i = 0; i < res.length; i++) {
+                                        if (results2.managerOption === res[i].full_name) {
+                                            managerPos = res[i]
+                                        }
+                                    }
+                                    // console.log('3', managerPos.full_name);
+                                    connection.query(
+                                        "UPDATE employees SET ? WHERE ?",
+                                        [{ manager: managerPos.full_name },
+                                        { full_name: results.employeeName }],
+                                        function () { }
+                                    )
+
+
                                     init()
                                 })
                             }
@@ -288,15 +329,22 @@ function addRole() {
             name: 'roleName',
             type: 'input',
             message: 'What is the name of the role you would like to add?'
-        }
+        },
     ]).then(results => {
-        connection.query(
-            "INSERT INTO roles SET ?",
-            {
-                title: results.roleName
-            }
-        )
-        init()
+        inquirer.prompt({
+            name: 'newSalary',
+            type: 'input',
+            message: `What is the desired salary for ${results.roleName}?`
+        }).then(results2 => {
+            connection.query(
+                "INSERT INTO roles SET ?",
+                {
+                    title: results.roleName,
+                    salary: results2.newSalary
+                }
+            )
+            init()
+        })
     })
 }
 
@@ -454,6 +502,3 @@ function updateRole(name) {
         }
     )
 }
-
-
-

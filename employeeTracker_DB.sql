@@ -5,7 +5,7 @@ CREATE DATABASE employeeTracker_DB;
 USE employeeTracker_DB;
 
 CREATE TABLE departments (
-DeptID INTEGER AUTO_INCREMENT NOT NULL,
+DeptID INTEGER,
 dep_name VARCHAR(30),
 PRIMARY KEY (DeptID)
 );	
@@ -24,7 +24,7 @@ full_name VARCHAR(30),
 roles VARCHAR(30),
 -- FOREIGN KEY (rolesId ) REFERENCES roles(rolesId),
 is_manager BOOLEAN DEFAULT FALSE,
-manager_id INTEGER NULL,
+manager VARCHAR(30),
 PRIMARY KEY (id)
 );	
 
@@ -39,9 +39,12 @@ SELECT * FROM employees;
 
 SELECT * FROM roles;
 
-SELECT *
-FROM employees
-LEFT JOIN roles 
+SELECT id, full_name, roles, salary, manager FROM
+employees LEFT JOIN roles 
+ON employees.roles = roles.title;
+
+SELECT id, full_name, dep_name FROM
+employees RIGHT JOIN departments 
 ON employees.roles = roles.title;
 
 -- SELECT * FROM departments;
