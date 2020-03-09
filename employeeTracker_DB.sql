@@ -39,6 +39,11 @@ SELECT * FROM employees;
 
 SELECT * FROM roles;
 
+SELECT *
+FROM employees
+LEFT JOIN roles 
+ON employees.roles = roles.title;
+
 -- SELECT * FROM departments;
 
 -- DELETE FROM roles;
