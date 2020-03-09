@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/jethan16/EmployeeTracker#readme",
   "dependencies": {
+    "console.table": "^0.10.0",
+    "fs": "0.0.1-security",
     "inquirer": "^7.0.6",
     "mysql": "^2.18.1",
     "nodemon": "^2.0.2"
