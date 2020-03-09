@@ -109,7 +109,6 @@ const manageDepartments = () => {
         message: 'What would you like to do?',
         choices: [
             'View all departments.',
-            'View employees by department.',
             'Add a new department.',
             'Remove an existing department.',
             '<-- Back.'
@@ -119,8 +118,6 @@ const manageDepartments = () => {
             viewDepartment()
         } else if (results.deptChoice === 'Add a new department.') {
             addDepartment()
-        } else if (results.deptChoice === 'View employees by department.') {
-            viewByDept()
         } else if (results.deptChoice === 'Remove an existing department.') {
             removeDepartment()
         } else {
